@@ -3,7 +3,7 @@
 	**Author Name**: Yazan Bargothi
 
 	## WRRC
-	![internal-source](/home/yazan/Movies-Library/wrrc.png)
+	![wrrc image](wrrc.png)
 
 	## Overview
 
