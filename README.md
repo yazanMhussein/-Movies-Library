@@ -17,4 +17,4 @@
 
 ## Project Features
 Home Page Endpoint (/): Display information about a specific movie.
-    Favorite Page Endpoint (/favorite): Display a welcome message for the favorite page. 
+Favorite Page Endpoint (/favorite): Display a welcome message for the favorite page. 
