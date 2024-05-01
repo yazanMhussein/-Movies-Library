@@ -72,6 +72,24 @@ app.post("/addMovies",addMovie)
 app.use(errorHandler);
 
 //get movie to our database
+
+
+
+
+function addMovie(req,res){
+    const addMovie = req.body;
+    const sql = 'INSERT INTO movieLibrary (movietitle,moviePosterPath,movieOverview,movieActorName) VALUES ($1,$2,$3,$4) RETURNING *'
+
+    const values = [addMovie.movietitle, addMovie.moviePosterPath,addMovie.movieOverview,addMovie.movieActorName]
+
+    client.query(sql, values)
+    .then((dataJ)=>{
+        res.send("your data was added") 
+    })
+    .catch(err=>{
+        errorHandler(err,req,res);
+    })
+}
 function getMovie(req,res){
     const sql ='SELECT * FROM movieLibrary';
     client.query(sql)
@@ -80,23 +98,6 @@ function getMovie(req,res){
     })
     .catch((err) => {
          errorHandler(err,req,res);
-    })
-}
-
-
-
-function addMovie(req,res){
-    const addMovie = req.body;
-    const sql = 'INSERT INTO movieLibrary (movietitle,moviePosterPath,movieOverview,movieActorName) VALUES ($1, $2, $3,$4) RETURNING *'
-
-    const values = [addMovie.movietitle, addMovie.moviePosterPath,addMovie.movieOverview,addMovie.movieActorName]
-
-    client.query(sql, values)
-    .then((dataJ)=>{
-        res.send("your data was added")
-    })
-    .catch(err=>{
-        errorHandler(err,req,res);
     })
 }
 
