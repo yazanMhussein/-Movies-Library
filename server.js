@@ -1,13 +1,16 @@
-//the set up for the server
+//setup the require things
 let axios = require('axios');
 const express = require('express')
 require('dotenv').config()
 const cors = require('cors')
+const dataJ = require('./Movie Data/data.json');
+const pg =   require('pg')
+// setup the server app = express and port = process.env.PORT
 const app = express()
 app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-const dataJ = require('./Movie Data/data.json');
+const client = new pg.Client('postgresql://localhost:5432/movielibrary')
 const PORT = process.env.PORT;
 
 
@@ -63,6 +66,39 @@ app.get("/movieTrening",movieTrening)
 app.get("/movieSearch",movieSearch)
 app.get("/popular",popularPerson)
 app.get("/tv",tvList)
+app.get("/getMovies",getMovie)
+app.post("/addMovies",addMovie)
+
+app.use(errorHandler);
+
+//get movie to our database
+function getMovie(req,res){
+    const sql ='SELECT * FROM movieLibrary';
+    client.query(sql)
+    .then((dataJ)=>{
+        res.send(dataJ.rows)
+    })
+    .catch((err) => {
+         errorHandler(err,req,res);
+    })
+}
+
+
+
+function addMovie(req,res){
+    const addMovie = req.body;
+    const sql = 'INSERT INTO movieLibrary (movietitle,moviePosterPath,movieOverview,movieActorName) VALUES ($1, $2, $3,$4) RETURNING *'
+
+    const values = [addMovie.movietitle, addMovie.moviePosterPath,addMovie.movieOverview,addMovie.movieActorName]
+
+    client.query(sql, values)
+    .then((dataJ)=>{
+        res.send("your data was added")
+    })
+    .catch(err=>{
+        errorHandler(err,req,res);
+    })
+}
 
 //this is function will you to the movieTrening router 
 function movieTrening(req,res){
@@ -78,10 +114,10 @@ axios.get(urlTrending)
          res.send(mapResult)
       })
       .catch((err)=>{
-        console.log("sorry you found me the error",err)
-        res.status(500).send(err)
+        errorHandler(err,req,res)
       })
-}//this is function will you to the movieSearch router 
+ }
+// this is function will you to the movieSearch router 
 function movieSearch(req,res){
     const mdbApiKey = process.env.mdbApiKey; 
                     
@@ -95,11 +131,11 @@ axios.get(urlsearch)
          res.send(mapResult)
       })
       .catch((err)=>{
-        console.log("sorry you found me the error",err)
-        res.status(500).send(err)
+        errorHandler(err,req,res)
       })
 
-}//this is function will you to the popular router 
+ }
+// //this is function will you to the popular router 
 function popularPerson(req,res){
     const mdbApiKey = process.env.mdbApiKey;             
     const urlUpopular =`https://api.themoviedb.org/3/person/popular?api_key=${mdbApiKey}&language=en-US&page=1`;
@@ -112,10 +148,10 @@ function popularPerson(req,res){
         res.send(mapResult)
      })
      .catch((err)=>{
-       console.log("sorry you found me the error",err)
-       res.status(500).send(err)
+        errorHandler(err,req,res)
      })
-}//this is function will you to the tv router 
+}
+//this is function will you to the tv router 
 function tvList(req,res){
     const mdbApiKey = process.env.mdbApiKey; 
     const UrlTv =`https://api.themoviedb.org/3/discover/tv?api_key=${mdbApiKey}&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=popularity.desc`;
@@ -128,8 +164,7 @@ function tvList(req,res){
         res.send(mapResult)
      })
      .catch((err)=>{
-       console.log("sorry you found me the error",err)
-       res.status(500).send(err)
+        errorHandler(err,req,res)
      })
 }
 // this is my main router        
@@ -146,13 +181,26 @@ function favoriteMessage (req,res){
 app.use((req, res, next) => {
     res.status(404).json({ status: 404, responseText: 'Page not found' });
   })
-// this is my 500 router i send a error message to the body if something doesn't work
-app.use((err,req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ status: 500, responseText: 'Sorry, something went wrong' });
-   })
-
-// here we are listen to the server on port 8080
+// // this is my 500 router i send a error message to the body if something doesn't work
+// app.use((err,req, res, next) => {
+//     console.error(err.stack);
+//     res.status(500).json({ status: 500, responseText: 'Sorry, something went wrong' });
+//    })
+   // i add a errorHandler 
+function errorHandler(erorr, req, res) {
+    const err = {
+        status: 500,
+        massage: erorr
+        }
+        res.status(500).send(err);
+    }
+    
+client.connect()
+.then(() =>{
+// here we are listen to the server port
 app.listen(PORT,() => {
-    console.log("Server is running on port 8080");
+    console.log("Server is running port");
 });
+})
+
+
