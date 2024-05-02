@@ -73,7 +73,7 @@ app.use(errorHandler);
 
 //get movie to our database
 
-
+//hi
 
 
 function addMovie(req,res){
