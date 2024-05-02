@@ -78,7 +78,8 @@ app.use(errorHandler);
 
 //get movie to our database
 
-//this read fro mthe database
+
+//this read from the database
 function getMovie(req,res){
     const sql = 'SELECT * FROM movieLibrary';
     client.query(sql)
@@ -89,6 +90,7 @@ function getMovie(req,res){
          errorHandler(err,req,res);
     })
 }
+
 //this create to the database
 function addMovie(req,res){
     const addMovie = req.body;
@@ -132,6 +134,7 @@ function deleteMovie(req,res){
          errorHandler(err,req,res);
     })
 }
+
 //this is function will you to the movieTrening router 
 function movieTrening(req,res){
 const mdbApiKey = process.env.mdbApiKey; 
