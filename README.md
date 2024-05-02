@@ -3,7 +3,8 @@
 **Author Name**: Yazan Bargothi
 
 ## WRRC
-![](./lab12img.png)
+
+![](./WRRC.png)
 
 ## Overview
 
