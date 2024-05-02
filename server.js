@@ -76,6 +76,17 @@ app.use(errorHandler);
 //hi
 
 
+
+function getMovie(req,res){
+    const sql ='SELECT * FROM movieLibrary';
+    client.query(sql)
+    .then((dataJ)=>{
+        res.send(dataJ.rows)
+    })
+    .catch((err) => {
+         errorHandler(err,req,res);
+    })
+}
 function addMovie(req,res){
     const addMovie = req.body;
     const sql = 'INSERT INTO movieLibrary (movietitle,moviePosterPath,movieOverview,movieActorName) VALUES ($1,$2,$3,$4) RETURNING *'
@@ -88,16 +99,6 @@ function addMovie(req,res){
     })
     .catch(err=>{
         errorHandler(err,req,res);
-    })
-}
-function getMovie(req,res){
-    const sql ='SELECT * FROM movieLibrary';
-    client.query(sql)
-    .then((dataJ)=>{
-        res.send(dataJ.rows)
-    })
-    .catch((err) => {
-         errorHandler(err,req,res);
     })
 }
 
