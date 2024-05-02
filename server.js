@@ -1,10 +1,12 @@
 //setup the require things
-let axios = require('axios');
+
 const express = require('express')
-require('dotenv').config()
 const cors = require('cors')
+
 const dataJ = require('./Movie Data/data.json');
 const pg =   require('pg')
+let axios = require('axios');
+require('dotenv').config()
 // setup the server app = express and port = process.env.PORT
 const app = express()
 app.use(cors())
@@ -67,18 +69,19 @@ app.get("/movieSearch",movieSearch)
 app.get("/popular",popularPerson)
 app.get("/tv",tvList)
 app.get("/getMovies",getMovie)
+app.delete("/DELETE/:id",deleteMovie)
+app.put("/UPDATE/:id",updateMovie)
 app.post("/addMovies",addMovie)
+
 
 app.use(errorHandler);
 
 //get movie to our database
 
-//hi
 
-
-
+//this read from the database
 function getMovie(req,res){
-    const sql ='SELECT * FROM movieLibrary';
+    const sql = 'SELECT * FROM movieLibrary';
     client.query(sql)
     .then((dataJ)=>{
         res.send(dataJ.rows)
@@ -87,18 +90,48 @@ function getMovie(req,res){
          errorHandler(err,req,res);
     })
 }
+
+//this create to the database
 function addMovie(req,res){
     const addMovie = req.body;
-    const sql = 'INSERT INTO movieLibrary (movietitle,moviePosterPath,movieOverview,movieActorName) VALUES ($1,$2,$3,$4) RETURNING *'
+    const sql = 'INSERT INTO movieLibrary (title,poster_path,overview) VALUES ($1,$2,$3) RETURNING *'
 
-    const values = [addMovie.movietitle, addMovie.moviePosterPath,addMovie.movieOverview,addMovie.movieActorName]
+    const values = [addMovie.title, addMovie.poster_path,addMovie.overview]
 
     client.query(sql, values)
     .then((dataJ)=>{
-        res.send("your data was added") 
+        res.status(200).send(dataJ.rows) 
     })
     .catch(err=>{
         errorHandler(err,req,res);
+    })
+}
+
+
+//this update to the database
+function updateMovie(req,res){
+    const id= req.params.id;
+    const sql =`UPDATE movielibrary SET title=$1, poster_path=$2, overview=$3 where id=${id} RETURNING *`;
+    const values = [res.body.title, res.body.poster_path, res.body.overview]
+    client.query(sql, values)
+    .then((dataJ)=>{
+        res.status(200).send(dataJ.rows)
+    })
+    .catch(err=>{
+        errorHandler(err,req,res);
+    })
+}
+
+//this delete from the database
+function deleteMovie(req,res){
+    const id= req.params.id;
+    const sql =`DELETE FROM movielibrary WHERE id=${id}`
+    client.query(sql)
+    .then((dataJ)=>{
+        res.status(204).json({})
+    })
+    .catch((err) => {
+         errorHandler(err,req,res);
     })
 }
 
