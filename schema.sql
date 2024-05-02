@@ -1,7 +1,6 @@
 CREATE TABLE movieLibrary(
-moviebaseId serial primary key,
-movietitle VARCHAR(255),
-movieposterpath VARCHAR(255),
-movieoverview VARCHAR(255),
-movieActorName VARCHAR(255)
+id serial primary key,
+title VARCHAR(255),
+poster_path VARCHAR(255),
+overview VARCHAR(255),
 )
