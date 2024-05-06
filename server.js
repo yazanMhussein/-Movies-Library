@@ -1,38 +1,48 @@
+'use strict';
+
 //setup the require things
 
 const express = require('express')
 const cors = require('cors')
+const app = express()
 
 const dataJ = require('./Movie Data/data.json');
-const pg =   require('pg')
+const pg = require('pg')
 let axios = require('axios');
 require('dotenv').config()
 // setup the server app = express and port = process.env.PORT
-const app = express()
+
 app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-const client = new pg.Client('postgresql://localhost:5432/movielibrary')
-const PORT = process.env.PORT;
+const client = new pg.Client('postgresql://localhost:5432/movielibrarydatabase')
+const PORT = 8080;
 
 
+// try this out to see a differents between class vs function
+// function Movie(title,poster_path,overview)
+// {
+//     this.title = title;
+//       this.poster_path = poster_path;
+//       this.overview = overview;
+// }
 
 
- // here is where i create constructor 
+// here is where i create constructor 
  class Movie {
-         constructor(title,poster_path,overview){
-          this.title = title;
-          this.poster_path = poster_path;
-          this.overview = overview;
-          }
-         }
-         // this is where i create a new instance of Movie class to pass it to json
-         const movieName = new Movie(
-             dataJ.title,
-             dataJ.poster_path,
-             dataJ.overview
-             );
-//here is where i create constructor list 
+    constructor(title,poster_path,overview){
+     this.title = title;
+     this.poster_path = poster_path;
+     this.overview = overview;
+     }
+    }
+    // this is where i create a new instance of Movie class to pass it to json
+    const movieName = new Movie(
+        dataJ.title,
+        dataJ.poster_path,
+        dataJ.overview
+        );
+// here is where i create constructor list 
 class Movie2 {
     constructor(id,poster_path,title,overview){
      this.id = id;
@@ -68,17 +78,21 @@ app.get("/movieTrening",movieTrening)
 app.get("/movieSearch",movieSearch)
 app.get("/popular",popularPerson)
 app.get("/tv",tvList)
+
+///router with database
 app.get("/getMovies",getMovie)
-app.delete("/DELETE/:id",deleteMovie)
-app.put("/UPDATE/:id",updateMovie)
 app.post("/addMovies",addMovie)
+app.put("/movieUpdate/:id",updateMovie)
+app.delete("/movieDelete/:id",deleteMovie)
 
 
 app.use(errorHandler);
 
 //get movie to our database
 
-//this read fro mthe database
+
+
+//this read form the database
 function getMovie(req,res){
     const sql = 'SELECT * FROM movieLibrary';
     client.query(sql)
@@ -89,6 +103,8 @@ function getMovie(req,res){
          errorHandler(err,req,res);
     })
 }
+
+
 //this create to the database
 function addMovie(req,res){
     const addMovie = req.body;
@@ -105,12 +121,12 @@ function addMovie(req,res){
     })
 }
 
-
 //this update to the database
 function updateMovie(req,res){
     const id= req.params.id;
-    const sql =`UPDATE movielibrary SET title=$1, poster_path=$2, overview=$3 where id=${id} RETURNING *`;
-    const values = [res.body.title, res.body.poster_path, res.body.overview]
+    
+    const sql =`UPDATE movieLibrary SET title=$1, poster_path=$2, overview=$3 where id=${id} RETURNING *`
+    const values = [req.body.title, req.body.poster_path, req.body.overview]
     client.query(sql, values)
     .then((dataJ)=>{
         res.status(200).send(dataJ.rows)
@@ -123,15 +139,17 @@ function updateMovie(req,res){
 //this delete from the database
 function deleteMovie(req,res){
     const id= req.params.id;
-    const sql =`DELETE FROM movielibrary WHERE id=${id}`
+    const sql =`DELETE FROM movieLibrary WHERE id=${id}`
     client.query(sql)
     .then((dataJ)=>{
         res.status(204).json({})
+
     })
     .catch((err) => {
          errorHandler(err,req,res);
     })
 }
+
 //this is function will you to the movieTrening router 
 function movieTrening(req,res){
 const mdbApiKey = process.env.mdbApiKey; 
@@ -204,6 +222,7 @@ function movieRouter (req,res) {
     // this is res.json(movieName) it's so the json can be put on the body
     res.json(movieName);
 }
+
 // this is my favorite router i send a message to the body    
 function favoriteMessage (req,res){
     res.send("Welcome to Favorite Page")
@@ -227,12 +246,12 @@ function errorHandler(erorr, req, res) {
         res.status(500).send(err);
     }
     
-client.connect()
-.then(() =>{
-// here we are listen to the server port
-app.listen(PORT,() => {
-    console.log("Server is running port");
-});
+    client.connect()
+    .then(() => {
+        // http://localhost:8080 => (Ip = localhost) (port = 8080)
+        app.listen(PORT, () => {
+            console.log(`listening on ${PORT} : I am ready`);
+    });
 })
 
 
